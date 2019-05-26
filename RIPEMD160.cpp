@@ -320,27 +320,29 @@ void RIPEMD160::formalizeOutputToText(string str[], int steps, int branchNumber)
 	cout << "=========================================================================" << endl;
 }
 
-//¸ù¾ÝÍâ²¿²î·ÖµÃµ½ÄÚ²¿µÄËùÓÐ¿ÉÄÜ²î·Ö,²¢¼ÆËã¸ÅÂÊ
+//æ ¹æ®å¤–éƒ¨å·®åˆ†å¾—åˆ°å†…éƒ¨çš„æ‰€æœ‰å¯èƒ½å·®åˆ†,å¹¶è®¡ç®—æ¦‚çŽ‡
 void RIPEMD160::getPossibleInDifference(UINT32 out, int shift, UINT32 possibleValue[], int &len){
 	len = 0;
 	UINT32 in, s = RR(out, shift);
 	//case 1: in = out>>>shift + 1, and out[shift-1 ~ 0] is not euqal to 0
-	in = s + 1;
-	if (out%EXP[shift] != 0){
+	in = (s + 1)%EXP[32-shift];
+	in =in+(s/EXP[32-shift])*EXP[32-shift];
+	if (out % EXP[shift] != 0) {
 		possibleValue[len] = in;
 		len++;
 	}
 
 	//case 2: in = out>>>shift - EXP[32-shift], and in[31-shift ~ 0] is not euqal to 0
 	in = s - EXP[32 - shift];
-	if (in % EXP[32 - shift] != 0){
+	if (in % EXP[32 - shift] != 0) {
 		possibleValue[len] = in;
 		len++;
 	}
 
 	//case 3: in = out>>>shift - EXP[32-shift] + 1, and in[31-shift ~ 0] is not euqal to 0, and out[shift-1 ~ 0] is not euqal to 0
-	in = s - EXP[32 - shift] + 1;
-	if (in / EXP[32 - shift] != 0 && out%EXP[shift] != 0){
+	in = (s + 1) % EXP[32 - shift];
+	in = in + ((s - EXP[32 - shift]) / EXP[32 - shift]) * EXP[32 - shift];
+	if (in % EXP[32 - shift] != 0 && out % EXP[shift] != 0) {
 		possibleValue[len] = in;
 		len++;
 	}
@@ -2523,13 +2525,13 @@ void RIPEMD160::computeFinalOutput(){
 	LIV[4] = RIV[4] = 0xefcdab89;//Y0
 
 	UINT32 h[5],fi[5];
-	h[0] = RR(LIV[0], 10);
-	h[4] = RR(LIV[1], 10);
-	h[3] = RR(LIV[2], 10);
+	h[0] = LL(LIV[0], 10);
+	h[4] = LL(LIV[1], 10);
+	h[3] = LL(LIV[2], 10);
 	h[2] = LIV[3];
 	h[1] = LIV[4];
 
-	///test found collision£¨30-step£©
+	///test found collisionï¼ˆ30-stepï¼‰
 	//int steps = 29;
 	/*wordDiff = 0 - EXP[15];
 	word[0] = 0x1fbb5316;
